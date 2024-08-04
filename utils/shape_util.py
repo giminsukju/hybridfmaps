@@ -2,7 +2,8 @@ import os
 import numpy as np
 import trimesh
 import networkx as nx
-import open3d as o3d
+import igl
+# import open3d as o3d
 
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import shortest_path
@@ -52,12 +53,14 @@ def read_shape(file, as_cloud=False):
         verts (np.ndarray): vertices [V, 3]
         faces (np.ndarray): faces [F, 3] or None
     """
+
+    if os.path.splitext(file)[1] == '.off':
+        verts, faces, _ = igl.read_off(file)
+    elif os.path.splitext(file)[1] == '.obj':
+        verts, _, _, faces, _, _ = igl.read_obj(file)
+
     if as_cloud:
-        verts = np.asarray(o3d.io.read_point_cloud(file).points)
         faces = None
-    else:
-        mesh = o3d.io.read_triangle_mesh(file)
-        verts, faces = np.asarray(mesh.vertices), np.asarray(mesh.triangles)
 
     return verts, faces
 
